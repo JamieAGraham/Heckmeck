@@ -2,19 +2,21 @@ import random
 import math
 
 class Tile:
-    def __init__(self, value, worms):
+    def __init__(self, value, worms, debug=False):
         self.value = value
         self.worms = worms
         self.face_down = False  # New attribute to indicate if the tile is face down
+        self.debug = debug
 
     def __repr__(self):
         return f"Tile(value={self.value}, worms={self.worms}, face_down={self.face_down})"
 
 class Player_Grill_Aware:
-    def __init__(self, name):
+    def __init__(self, name, debug=False):
         self.name = name
         self.tiles = []
         self.target_score = 0
+        self.debug = debug
 
     def sigmoid(self, x):
         return 1 / (1 + math.exp(-x))
@@ -55,7 +57,8 @@ class Player_Grill_Aware:
 
             # Check if player has reached or exceeded target score and decide whether to stop
             stop_probability = self.calculate_stop_probability(total_score)
-            print(f"{self.name} has a stop probability of {stop_probability:.2f}")
+            if self.debug:
+                print(f"{self.name} has a stop probability of {stop_probability:.2f}")
 
             if total_score >= 21 and 'worm' in current_dice and random.random() < stop_probability:
                 break

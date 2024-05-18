@@ -9,6 +9,13 @@ class Player:
         self.risk_level = risk_level
         self.target_score_offset = target_score_offset
 
+        
+    def reset(self):
+        # Added when looping as existing players did not reset tiles when playing multiple games.
+        # This should *probably* be run at the end of each game but in the ThunderDome loop this has been done explicitly
+        # when starting each match up in the round robin.
+        self.tiles = []
+
     def sigmoid(self, x):
         return 1 / (1 + math.exp(-x))
 
