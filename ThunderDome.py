@@ -75,6 +75,3 @@ def simulate_tournament():
 
 # Run the tournament simulation
 simulate_tournament()
-
-# Run the tournament simulation
-simulate_tournament()
