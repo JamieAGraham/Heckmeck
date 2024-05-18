@@ -2,25 +2,27 @@ import random
 import math
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, risk_level=5, target_score_offset=0):
         self.name = name
         self.tiles = []
         self.target_score = 0
+        self.risk_level = risk_level
+        self.target_score_offset = target_score_offset
 
     def sigmoid(self, x):
         return 1 / (1 + math.exp(-x))
 
     def calculate_stop_probability(self, current_score):
         difference = current_score - self.target_score
-        probability = self.sigmoid(difference / 5)
+        probability = self.sigmoid(difference / self.risk_level)
         return probability
 
     def take_turn(self, grill):
         available_tiles = [tile.value for tile in grill if not tile.face_down]
         if available_tiles:
-            self.target_score = max(available_tiles) + random.randint(-2, 2)
+            self.target_score = max(available_tiles) + self.target_score_offset
         else:
-            self.target_score = 21
+            self.target_score = 21 + self.target_score_offset
 
         current_dice = []
         available_dice = [1, 2, 3, 4, 5, 'worm']
@@ -70,16 +72,20 @@ class Player:
         return None
 
 class CautiousPlayer(Player):
-    def calculate_stop_probability(self, current_score):
-        difference = current_score - self.target_score
-        probability = self.sigmoid(difference / 10)  # Less likely to continue
-        return probability
+    def __init__(self, name):
+        super().__init__(name, risk_level=10, target_score_offset=-2)
 
 class RiskTakerPlayer(Player):
-    def calculate_stop_probability(self, current_score):
-        difference = current_score - self.target_score
-        probability = self.sigmoid(difference / 2)  # More likely to continue
-        return probability
+    def __init__(self, name):
+        super().__init__(name, risk_level=2, target_score_offset=2)
+
+class BalancedPlayer(Player):
+    def __init__(self, name):
+        super().__init__(name, risk_level=5, target_score_offset=0)
+
+class CustomPlayer(Player):
+    def __init__(self, name, risk_level, target_score_offset):
+        super().__init__(name, risk_level, target_score_offset)
     
 # Old iterations of player classes:
 
