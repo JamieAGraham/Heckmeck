@@ -256,7 +256,7 @@ class Game:
                 print(f"Turn {turn_counter}")
                 if not self.play_turn(player):
                     self.print_final_scores()
-                    return  # End the game
+                    return self.calculate_winner() # End the game
 
                 # Debug: Print remaining center tiles
                 remaining_tiles = [tile for tile in self.center_tiles if not tile.face_down]
@@ -264,8 +264,6 @@ class Game:
 
         print("Reached maximum number of turns. Game over.")
         self.print_final_scores()
-        print(self.calculate_winner())
-        return self.calculate_winner()
 
     def claim_tile(self, player, kept_dice):
         total = player.calculate_sum(kept_dice)
