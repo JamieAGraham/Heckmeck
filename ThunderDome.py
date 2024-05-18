@@ -44,14 +44,16 @@ def simulate_tournament():
         ("RiskTakerPlayer", RiskTakerPlayer),
         ("BalancedPlayer", BalancedPlayer),
         ("CustomPlayer1", lambda name: CustomPlayer(name, risk_level=3, target_score_offset=1)),
-        ("CustomPlayer2", lambda name: CustomPlayer(name, risk_level=7, target_score_offset=-1))
+        ("CustomPlayer2", lambda name: CustomPlayer(name, risk_level=7, target_score_offset=-1)),
+        ("CustomPlayer5", lambda name: CustomPlayer(name, risk_level=2, target_score_offset=5)),
+        ("CustomPlayer7", lambda name: CustomPlayer(name, risk_level=2, target_score_offset=7))
     ]
     
     players = [player_type_class(f"{player_type_name}_{i + 1}")
                for player_type_name, player_type_class in player_type_classes
                for i in range(1)]
     
-    num_games = 100  # Reduced for quicker test runs
+    num_games = 9794  # Reduced for quicker test runs
     results = round_robin(players, num_games)
     
     # Print results in grid format with explicit axis labeling
