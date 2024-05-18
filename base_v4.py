@@ -307,9 +307,11 @@ class Game:
         max_score = max(scores.values())
         candidates = [player for player, score in scores.items() if score == max_score]
         if len(candidates) == 1:
-            return candidates[0]
+            winner = candidates[0]
         else:
-            return max(candidates, key=lambda p: max(tile.value for tile in p.tiles))
+            winner = max(candidates, key=lambda p: max(tile.value for tile in p.tiles))
+        winner_position = self.players.index(winner)
+        return winner, winner_position
 
 
     def print_final_scores(self):
