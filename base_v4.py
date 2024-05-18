@@ -10,143 +10,6 @@ class Tile:
     def __repr__(self):
         return f"Tile(value={self.value}, worms={self.worms}, face_down={self.face_down})"
 
-# Player class has a user-inputtable target score at which point they will end their turn
-# If possible, they first take a worm and generally prioritise higher dice rolls no matter the multiple
-# class Player:
-#     def __init__(self, name, target_score=25):
-#         self.name = name
-#         self.tiles = []
-#         self.target_score = target_score
-
-#     def take_turn(self):
-#         current_dice = []
-#         available_dice = [1, 2, 3, 4, 5, 'worm']
-#         while True:
-#             roll = [random.choice(available_dice) for _ in range(8 - len(current_dice))]
-#             print(f"{self.name} rolls: {roll}")
-            
-#             # Decide which dice to keep
-#             choice = self.choose_dice(roll)
-#             if choice is None:
-#                 break
-            
-#             current_dice.extend(choice)
-#             print(f"{self.name} keeps: {choice} -> Current dice: {current_dice}")
-
-#             # Check if player has reached or exceeded target score
-#             total_score = self.calculate_sum(current_dice)
-#             if total_score >= self.target_score and 'worm' in current_dice:
-#                 break
-
-#             if len(current_dice) == 8:  # No more dice to roll
-#                 break
-            
-#             available_dice = [die for die in available_dice if die not in current_dice]
-#             if not available_dice:  # No more dice choices left
-#                 break
-
-#         return current_dice
-
-#     def choose_dice(self, roll):
-#         counts = {die: roll.count(die) for die in set(roll)}
-#         # Prioritize keeping worms if available, otherwise keep the highest value
-#         if 'worm' in counts:
-#             return ['worm'] * counts['worm']
-#         if counts:
-#             max_val = max(die for die in counts if die != 'worm')
-#             return [max_val] * counts[max_val]
-#         return None
-
-#     def calculate_sum(self, kept_dice):
-#         return sum(die if die != 'worm' else 5 for die in kept_dice)
-
-#     def has_worm(self, kept_dice):
-#         return 'worm' in kept_dice
-
-#     def add_tile(self, tile):
-#         self.tiles.append(tile)
-
-#     def return_tile(self):
-#         if self.tiles:
-#             return self.tiles.pop()
-#         return None
-
-# # Player_Sigmoid class is similar to Player but instead of a hard cut-off at the target score has a probability to "bottle it" before the target score
-# class Player_Sigmoid:
-#     def __init__(self, name, target_score=25):
-#         self.name = name
-#         self.tiles = []
-#         self.target_score = target_score
-
-#     def sigmoid(self, x):
-#         return 1 / (1 + math.exp(-x))
-
-#     def calculate_stop_probability(self, current_score):
-#         # Calculate the difference between the current score and the target score
-#         difference = current_score - self.target_score
-#         # Apply the sigmoid function to the difference
-#         probability = self.sigmoid(difference / 5)  # Adjust the divisor to control the steepness
-#         return probability
-
-#     def take_turn(self):
-#         current_dice = []
-#         available_dice = [1, 2, 3, 4, 5, 'worm']
-#         while True:
-#             roll = [random.choice(available_dice) for _ in range(8 - len(current_dice))]
-#             print(f"{self.name} rolls: {roll}")
-            
-#             # Decide which dice to keep
-#             choice = self.choose_dice(roll)
-#             if choice is None:
-#                 break
-            
-#             current_dice.extend(choice)
-#             print(f"{self.name} keeps: {choice} -> Current dice: {current_dice}")
-
-#             # Calculate current total score
-#             total_score = self.calculate_sum(current_dice)
-
-#             # Check if player has reached or exceeded target score and decide whether to stop
-#             stop_probability = self.calculate_stop_probability(total_score)
-#             print(f"{self.name} has a stop probability of {stop_probability:.2f}")
-
-#             if total_score >= 21 and 'worm' in current_dice and random.random() < stop_probability:
-#                 break
-
-#             if len(current_dice) == 8:  # No more dice to roll
-#                 break
-            
-#             available_dice = [die for die in available_dice if die not in current_dice]
-#             if not available_dice:  # No more dice choices left
-#                 break
-
-#         return current_dice
-
-#     def choose_dice(self, roll):
-#         counts = {die: roll.count(die) for die in set(roll)}
-#         # Prioritize keeping worms if available, otherwise keep the highest value
-#         if 'worm' in counts:
-#             return ['worm'] * counts['worm']
-#         if counts:
-#             max_val = max(die for die in counts if die != 'worm')
-#             return [max_val] * counts[max_val]
-#         return None
-
-#     def calculate_sum(self, kept_dice):
-#         return sum(die if die != 'worm' else 5 for die in kept_dice)
-
-#     def has_worm(self, kept_dice):
-#         return 'worm' in kept_dice
-
-#     def add_tile(self, tile):
-#         self.tiles.append(tile)
-
-#     def return_tile(self):
-#         if self.tiles:
-#             return self.tiles.pop()
-#         return None
-
-
 class Player_Grill_Aware:
     def __init__(self, name):
         self.name = name
@@ -233,18 +96,20 @@ class Player_Grill_Aware:
 
 
 class Game:
-    def __init__(self, players, tiles):
+    def __init__(self, players, tiles, debug=False):
         self.players = players
         self.center_tiles = tiles
+        self.debug = debug
 
     def play_turn(self, player):
         kept_dice = player.take_turn(self.center_tiles)
-        if not self.claim_tile(player, kept_dice):
+        if not self.claim_tile(player, kept_dice) and self.debug:
             print(f"{player.name} failed to claim a tile and returned one to the center.")
         
         # Check if all center tiles are face down
         if all(tile.face_down for tile in self.center_tiles):
-            print("All tiles are face down. Game over.")
+            if self.debug:
+                print("All tiles are face down. Game over.")
             return False  # Indicate the game should end
         return True  # Indicate the game should continue
 
@@ -253,52 +118,61 @@ class Game:
         while turn_counter < 1000:  # Cap to avoid infinite loops in testing
             for player in self.players:
                 turn_counter += 1
-                print(f"Turn {turn_counter}")
+                if self.debug:
+                    print(f"Turn {turn_counter}")
                 if not self.play_turn(player):
-                    self.print_final_scores()
+                    if self.debug:
+                        self.print_final_scores()
                     return self.calculate_winner() # End the game
 
                 # Debug: Print remaining center tiles
                 remaining_tiles = [tile for tile in self.center_tiles if not tile.face_down]
-                print(f"Remaining center tiles: {[tile.value for tile in remaining_tiles]}")
+                if self.debug:
+                    print(f"Remaining center tiles: {[tile.value for tile in remaining_tiles]}")
 
         print("Reached maximum number of turns. Game over.")
         self.print_final_scores()
 
     def claim_tile(self, player, kept_dice):
         total = player.calculate_sum(kept_dice)
-        print(f"{player.name} tries to claim with total: {total} and dice: {kept_dice}")
+        if self.debug:
+            print(f"{player.name} tries to claim with total: {total} and dice: {kept_dice}")
         
         if total >= 21 and player.has_worm(kept_dice):
             available_tiles = [tile for tile in self.center_tiles if tile.value <= total and not tile.face_down]
-            print(f"Available tiles: {[tile.value for tile in available_tiles]}")
+            if self.debug:
+                print(f"Available tiles: {[tile.value for tile in available_tiles]}")
             
             if available_tiles:
                 claimed_tile = max(available_tiles, key=lambda t: t.value)
                 player.add_tile(claimed_tile)
                 self.center_tiles.remove(claimed_tile)
-                print(f"{player.name} claims tile: {claimed_tile.value} -> Tiles: {player.tiles}")
+                if self.debug:
+                    print(f"{player.name} claims tile: {claimed_tile.value} -> Tiles: {player.tiles}")
                 return True  # Successful claim
             else:
                 # Check if the player can steal a tile from another player
                 for other_player in self.players:
                     if other_player != player and other_player.tiles and other_player.tiles[-1].value == total:
                         player.add_tile(other_player.tiles.pop())
-                        print(f"{player.name} steals tile from {other_player.name} -> Tiles: {player.tiles}")
+                        if self.debug:
+                            print(f"{player.name} steals tile from {other_player.name} -> Tiles: {player.tiles}")
                         return True  # Successful claim
         
         returned_tile = player.return_tile()
         if returned_tile:
             self.center_tiles.append(returned_tile)
             self.center_tiles = sorted(self.center_tiles, key=lambda t: t.value)
-            print(f"{player.name} fails and returns tile: {returned_tile.value} -> Center tiles: {[tile.value for tile in self.center_tiles if not tile.face_down]}")
+            if self.debug:
+                print(f"{player.name} fails and returns tile: {returned_tile.value} -> Center tiles: {[tile.value for tile in self.center_tiles if not tile.face_down]}")
 
             # Turn the highest available tile face down
             non_face_down_tiles = [tile for tile in self.center_tiles if not tile.face_down]
             if non_face_down_tiles:
                 highest_tile = max(non_face_down_tiles, key=lambda t: t.value)
                 highest_tile.face_down = True
-                print(f"The highest tile {highest_tile.value} is now face down.")
+                if self.debug:
+                    print(f"The highest tile {highest_tile.value} is now face down.")
         
         return False  # Failed claim
     
