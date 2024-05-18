@@ -4,27 +4,37 @@ from base_v4 import Game, Tile
 from collections import defaultdict
 
 def simulate_game(player1, player2):
+    tiles = [Tile(value, worms) for value, worms in zip(range(21, 37), [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4])]
+    game = Game([player1, player2], tiles)
+    
+    # Reset players' tiles before starting the game
     player1.reset()
     player2.reset()
-    tiles = [Tile(value, worms) for value, worms in zip(range(21, 37), [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4])]
-    game = Game([player1, player2], tiles, debug=True)
+
     winner, _ = game.play_game()
     return winner.name
 
 def round_robin(players, num_games):
-    results = defaultdict(int)
-    matchups = [(i, j) for i in range(len(players)) for j in range(i + 1, len(players))]
+    num_players = len(players)
+    results = [[0 for _ in range(num_players)] for _ in range(num_players)]
+    matchups = [(i, j) for i in range(num_players) for j in range(i + 1, num_players)]
     
     for i, j in matchups:
         player1 = players[i]
         player2 = players[j]
         for _ in range(num_games):
             winner = simulate_game(player1, player2)
-            results[winner] += 1
+            if winner == player1.name:
+                results[i][j] += 1
+            else:
+                results[j][i] += 1
             
             # Alternate the starting player
             winner = simulate_game(player2, player1)
-            results[winner] += 1
+            if winner == player2.name:
+                results[j][i] += 1
+            else:
+                results[i][j] += 1
 
     return results
 
@@ -41,11 +51,30 @@ def simulate_tournament():
                for player_type_name, player_type_class in player_type_classes
                for i in range(1)]
     
-    num_games = 9794  # Sample size for detecting a 2% effect size
+    num_games = 100  # Reduced for quicker test runs
     results = round_robin(players, num_games)
     
-    for player_name, wins in results.items():
-        print(f"{player_name} wins: {wins} times")
+    # Print results in grid format with explicit axis labeling
+    print("Results Grid (Number of Wins):")
+    player_names = [player.name for player in players]
+    
+    # Print header row
+    header = "\t".join([""] + player_names)
+    print(header)
+    
+    # Print each row
+    for i, player_name in enumerate(player_names):
+        row = [player_name] + results[i]
+        print("\t".join(map(str, row)))
+    
+    print("\nDetailed Matchups (Wins for each player against every other player):")
+    for i, player_name_1 in enumerate(player_names):
+        for j, player_name_2 in enumerate(player_names):
+            if i != j:
+                print(f"{player_name_1} vs {player_name_2}: {results[i][j]} wins")
+
+# Run the tournament simulation
+simulate_tournament()
 
 # Run the tournament simulation
 simulate_tournament()
