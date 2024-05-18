@@ -324,12 +324,12 @@ class Game:
 
 # Create game instance
 players = [
-    Player_Grill_Aware("Player 1"),
-    Player_Grill_Aware("Player 2"),
-    Player_Grill_Aware("Player 3"),
-    Player_Grill_Aware("Player 4"),
-    Player_Grill_Aware("Player 5"),
-    Player_Grill_Aware("Player 6")
+    Player_Grill_Aware("Player A"),
+    Player_Grill_Aware("Player B"),
+    Player_Grill_Aware("Player C"),
+    Player_Grill_Aware("Player D"),
+    Player_Grill_Aware("Player E"),
+    Player_Grill_Aware("Player F")
 ]
 
 # Create tiles
