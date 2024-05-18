@@ -264,6 +264,8 @@ class Game:
 
         print("Reached maximum number of turns. Game over.")
         self.print_final_scores()
+        print(self.calculate_winner())
+        return self.calculate_winner()
 
     def claim_tile(self, player, kept_dice):
         total = player.calculate_sum(kept_dice)
@@ -301,6 +303,16 @@ class Game:
                 print(f"The highest tile {highest_tile.value} is now face down.")
         
         return False  # Failed claim
+    
+    def calculate_winner(self):
+        scores = {player: sum(tile.worms for tile in player.tiles) for player in self.players}
+        max_score = max(scores.values())
+        candidates = [player for player, score in scores.items() if score == max_score]
+        if len(candidates) == 1:
+            return candidates[0]
+        else:
+            return max(candidates, key=lambda p: max(tile.value for tile in p.tiles))
+
 
     def print_final_scores(self):
         print("Final Scores:")
